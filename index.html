@@ -1,0 +1,1024 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VolleyVision AI - Advanced ML Volleyball Analytics</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        /* Modern CSS with the beautiful design */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 50%, #16213e 100%);
+            color: #ffffff;
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* Header */
+        .header {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 1rem 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header .container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: 2rem;
+            font-weight: 700;
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4, #45b7d1);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .tagline {
+            font-size: 0.9rem;
+            color: #a0a0a0;
+            margin-top: -5px;
+        }
+
+        .nav {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .nav-btn {
+            background: transparent;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: #ffffff;
+            padding: 0.5rem 1rem;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: 'Inter', sans-serif;
+            font-weight: 500;
+        }
+
+        .nav-btn:hover, .nav-btn.active {
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+            border-color: transparent;
+            transform: translateY(-2px);
+        }
+
+        /* Main Content */
+        .main {
+            padding: 2rem 0;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Dashboard Grid */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        /* Input Section */
+        .input-section {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 20px;
+            padding: 2rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .input-section h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.8rem;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .section-description {
+            color: #a0a0a0;
+            margin-bottom: 2rem;
+            font-size: 0.95rem;
+        }
+
+        .stats-form {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .form-section {
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 15px;
+            padding: 1.5rem;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            transition: all 0.3s ease;
+        }
+
+        .form-section:hover {
+            background: rgba(255, 255, 255, 0.05);
+            border-color: rgba(255, 255, 255, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .form-section-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.1rem;
+            color: #4ecdc4;
+            margin-bottom: 1rem;
+            font-weight: 600;
+            text-align: center;
+            letter-spacing: 0.5px;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .form-row:has(.form-group:only-child) {
+            grid-template-columns: 1fr;
+        }
+
+        .form-row:has(.form-group:nth-child(2):last-child) {
+            grid-template-columns: repeat(2, 1fr);
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            min-width: 0; /* Prevents overflow */
+        }
+
+        .form-group label {
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+            color: #e0e0e0;
+            font-size: 0.9rem;
+            white-space: nowrap;
+        }
+
+        .form-group input {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            padding: 0.75rem;
+            color: #ffffff;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #4ecdc4;
+            box-shadow: 0 0 0 3px rgba(78, 205, 196, 0.1);
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .btn-primary {
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+            color: white;
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.1);
+            color: #ffffff;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Results Section */
+        .results-section {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 20px;
+            padding: 2rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .results-section h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.8rem;
+            margin-bottom: 2rem;
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        /* Score Card */
+        .score-card {
+            background: linear-gradient(135deg, rgba(255, 107, 107, 0.1), rgba(78, 205, 196, 0.1));
+            border-radius: 15px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .score-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .score-header h3 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.3rem;
+        }
+
+        .score-badge {
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 1.2rem;
+        }
+
+        .score-description {
+            color: #a0a0a0;
+            font-size: 0.9rem;
+        }
+
+        /* Chart Container */
+        .chart-container {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .chart-container h3 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.3rem;
+            margin-bottom: 1rem;
+            color: #e0e0e0;
+        }
+
+        /* Team Comparison */
+        .team-comparison-section {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .team-actions {
+            display: flex;
+            gap: 1rem;
+            margin: 1rem 0;
+        }
+
+        /* Predictions */
+        .predictions-container {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 1.5rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .predictions-container h3 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.3rem;
+            margin-bottom: 1rem;
+            color: #e0e0e0;
+        }
+
+        .prediction-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+        }
+
+        .prediction-card {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            padding: 1rem;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .prediction-card h4 {
+            font-size: 0.9rem;
+            color: #a0a0a0;
+            margin-bottom: 0.5rem;
+        }
+
+        .prediction-value {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #4ecdc4;
+        }
+
+        /* Analytics Grid */
+        .analytics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .analytics-card {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 20px;
+            padding: 2rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .analytics-card h3 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            color: #e0e0e0;
+        }
+
+        .card-description {
+            color: #a0a0a0;
+            margin-bottom: 1.5rem;
+        }
+
+        /* Predictions Grid */
+        .predictions-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .prediction-insight {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 20px;
+            padding: 2rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .prediction-insight h3 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            color: #e0e0e0;
+        }
+
+        .recommendations-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .recommendations-list li {
+            background: rgba(255, 255, 255, 0.05);
+            margin-bottom: 0.5rem;
+            padding: 0.75rem;
+            border-radius: 8px;
+            border-left: 3px solid #4ecdc4;
+        }
+
+        /* Similarity Grid */
+        .similarity-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .similarity-card {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 20px;
+            padding: 2rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .similarity-card h3 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            color: #e0e0e0;
+        }
+
+        .similarity-chart-container {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 20px;
+            padding: 2rem;
+            margin-top: 2rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        /* Footer */
+        .footer {
+            background: rgba(255, 255, 255, 0.05);
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 2rem 0;
+            margin-top: 4rem;
+            text-align: center;
+            color: #a0a0a0;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+                gap: 1.5rem;
+            }
+            
+            .form-row {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+            
+            .form-row:has(.form-group:nth-child(2):last-child) {
+                grid-template-columns: 1fr;
+            }
+            
+            .form-actions {
+                flex-direction: column;
+            }
+            
+            .btn {
+                width: 100%;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .input-section,
+            .results-section {
+                padding: 1.5rem;
+            }
+            
+            .form-section {
+                padding: 1rem;
+            }
+        }
+
+        /* Original Chart Styles - Preserved */
+        #performanceChart {
+            margin-top: 30px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            padding: 20px;
+        }
+
+        /* Advanced Animations and Effects */
+        .input-section, .results-section, .analytics-card, .prediction-insight, .similarity-card {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .input-section::before, .results-section::before, .analytics-card::before, 
+        .prediction-insight::before, .similarity-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+            transition: left 0.5s;
+        }
+
+        .input-section:hover::before, .results-section:hover::before, .analytics-card:hover::before,
+        .prediction-insight:hover::before, .similarity-card:hover::before {
+            left: 100%;
+        }
+
+        /* Floating Animation */
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .score-badge {
+            animation: float 3s ease-in-out infinite;
+        }
+
+        /* Pulse Animation */
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        .btn-primary:hover {
+            animation: pulse 0.6s ease-in-out;
+        }
+
+        /* Gradient Text Animation */
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .logo h1 {
+            background-size: 200% 200%;
+            animation: gradientShift 3s ease infinite;
+        }
+
+        /* Card Hover Effects */
+        .chart-container {
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+        }
+
+        .chart-container:hover {
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+        }
+
+        .chart-container::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.05), transparent);
+            opacity: 0;
+            transition: opacity 0.3s;
+            pointer-events: none;
+        }
+
+        .chart-container:hover::after {
+            opacity: 1;
+        }
+
+        /* Form Input Focus Effects */
+        .form-group input:focus {
+            transform: scale(1.02);
+            box-shadow: 0 0 0 3px rgba(78, 205, 196, 0.3), 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Prediction Cards Animation */
+        .prediction-card {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+        }
+
+        .prediction-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+        }
+
+        .prediction-value {
+            transition: all 0.3s ease;
+        }
+
+        .prediction-card:hover .prediction-value {
+            transform: scale(1.1);
+            text-shadow: 0 0 10px rgba(78, 205, 196, 0.5);
+        }
+
+        /* Navigation Button Effects */
+        .nav-btn {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .nav-btn::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            transition: width 0.3s, height 0.3s;
+        }
+
+        .nav-btn:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+
+        /* Loading Animation */
+        @keyframes shimmer {
+            0% { background-position: -200px 0; }
+            100% { background-position: calc(200px + 100%) 0; }
+        }
+
+        .loading {
+            background: linear-gradient(90deg, rgba(255, 255, 255, 0.1) 25%, rgba(255, 255, 255, 0.2) 50%, rgba(255, 255, 255, 0.1) 75%);
+            background-size: 200px 100%;
+            animation: shimmer 1.5s infinite;
+        }
+
+        /* Scroll Animations */
+        .fade-in {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.6s ease;
+        }
+
+        .fade-in.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(45deg, #4ecdc4, #ff6b6b);
+        }
+
+        /* Glassmorphism Enhancement */
+        .header, .input-section, .results-section, .analytics-card, .prediction-insight, .similarity-card {
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+        }
+
+        /* Particle Effect Background */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                radial-gradient(circle at 20% 80%, rgba(255, 107, 107, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(78, 205, 196, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 40% 40%, rgba(241, 196, 15, 0.05) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: -1;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <div class="logo">
+                <h1>VolleyVision AI</h1>
+                <p class="tagline">Advanced ML Volleyball Analytics</p>
+            </div>
+            <nav class="nav">
+                <button class="nav-btn active" data-tab="dashboard">Dashboard</button>
+                <button class="nav-btn" data-tab="analytics">ML Analytics</button>
+                <button class="nav-btn" data-tab="predictions">AI Predictions</button>
+                <button class="nav-btn" data-tab="similarity">Player Similarity</button>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main">
+        <div class="container">
+            <!-- Dashboard Tab -->
+            <div class="tab-content active" id="dashboard">
+                <div class="dashboard-grid">
+                    <!-- Input Section -->
+                    <section class="input-section">
+                        <h2>Player Performance Input</h2>
+                        <p class="section-description">Enter match statistics to generate advanced ML analytics and AI predictions.</p>
+                        
+                        <form id="statsForm" class="stats-form">
+                            <!-- Player Information Row -->
+                            <div class="form-section">
+                                <h4 class="form-section-title">👤 Player Information</h4>
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label for="playerName">Player Name</label>
+                                        <input type="text" id="playerName" name="playerName" placeholder="e.g. Shreeya Gupta" required>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Performance Metrics Row -->
+                            <div class="form-section">
+                                <h4 class="form-section-title">🏐 Performance Metrics</h4>
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label for="spikeAccuracy">Spike Accuracy (%)</label>
+                                        <input type="number" id="spikeAccuracy" name="spikeAccuracy" min="0" max="100" value="87" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="blocks">Blocks</label>
+                                        <input type="number" id="blocks" name="blocks" min="0" value="6" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="digs">Digs</label>
+                                        <input type="number" id="digs" name="digs" min="0" value="22" required>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Additional Metrics Row -->
+                            <div class="form-section">
+                                <h4 class="form-section-title">⚡ Additional Metrics</h4>
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label for="serves">Aces/Serves</label>
+                                        <input type="text" id="serves" name="serves" placeholder="e.g. 4/12" value="4/12" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="reactionTime">Reaction Time (ms)</label>
+                                        <input type="number" id="reactionTime" name="reactionTime" min="100" max="600" value="310" required>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="form-actions">
+                                <button type="button" id="autofillBtn" class="btn btn-secondary" onclick="autoFill()">🔄 Autofill Sample</button>
+                                <button type="submit" class="btn btn-primary" onclick="submitForm()">🤖 Generate ML Analytics</button>
+                            </div>
+                        </form>
+                    </section>
+
+                    <!-- Results Section -->
+                    <section class="results-section">
+                        <h2>Advanced ML Analytics</h2>
+                        
+                        <!-- Performance Score -->
+                        <div class="score-card">
+                            <div class="score-header">
+                                <h3>AI Efficiency Score</h3>
+                                <div class="score-badge" id="efficiencyScore">--</div>
+                            </div>
+                            <div class="score-description">
+                                <p>ML-powered efficiency calculation with weighted performance metrics and anomaly detection.</p>
+                            </div>
+                        </div>
+
+                        <!-- Chart Container -->
+                        <div class="chart-container">
+                            <h3>Performance Breakdown</h3>
+                            <canvas id="performanceChart"></canvas>
+                        </div>
+
+                        <!-- Radar Chart -->
+                        <div class="chart-container">
+                            <h3>Skill Radar Analysis</h3>
+                            <canvas id="radarChart"></canvas>
+                        </div>
+
+                        <!-- Predictions -->
+                        <div class="predictions-container">
+                            <h3>AI Predictions</h3>
+                            <div class="prediction-grid">
+                                <div class="prediction-card">
+                                    <h4>Next Match Performance</h4>
+                                    <p class="prediction-value" id="nextMatchPrediction">--</p>
+                                </div>
+                                <div class="prediction-card">
+                                    <h4>Improvement Areas</h4>
+                                    <p class="prediction-value" id="improvementAreas">--</p>
+                                </div>
+                                <div class="prediction-card">
+                                    <h4>ML Confidence Level</h4>
+                                    <p class="prediction-value" id="confidenceLevel">--</p>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+                </div>
+            </div>
+
+            <!-- ML Analytics Tab -->
+            <div class="tab-content" id="analytics">
+                <h2>Advanced Machine Learning Analytics</h2>
+                <div class="analytics-grid">
+                    <div class="analytics-card">
+                        <h3>Time-Series Forecasting (Prophet-like)</h3>
+                        <p class="card-description">Predicts future performance using historical data patterns and trend analysis.</p>
+                        <canvas id="forecastChart"></canvas>
+                    </div>
+                    <div class="analytics-card">
+                        <h3>Anomaly Detection with SHAP</h3>
+                        <p class="card-description">Identifies exceptional performances and explains contributing factors using SHAP-like explanations.</p>
+                        <div class="anomaly-info">
+                            <div class="anomaly-status" id="anomalyStatus">No anomalies detected</div>
+                            <div class="anomaly-explanation" id="anomalyExplanation"></div>
+                        </div>
+                        <canvas id="anomalyChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- AI Predictions Tab -->
+            <div class="tab-content" id="predictions">
+                <h2>AI-Powered Predictions & Insights</h2>
+                <div class="predictions-grid">
+                    <div class="prediction-insight">
+                        <h3>Performance Forecasting</h3>
+                        <div class="forecast-chart">
+                            <canvas id="forecastChart2"></canvas>
+                        </div>
+                    </div>
+                    <div class="prediction-insight">
+                        <h3>ML Recommendations</h3>
+                        <ul class="recommendations-list" id="recommendationsList">
+                            <li>Enter your stats to see personalized ML recommendations</li>
+                        </ul>
+                        <canvas id="recommendationsChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Player Similarity Tab -->
+            <div class="tab-content" id="similarity">
+                <h2>Player Similarity Search (Cosine Similarity)</h2>
+                <div class="similarity-grid">
+                    <div class="similarity-card">
+                        <h3>Current Player Profile</h3>
+                        <div class="player-profile">
+                            <div class="profile-info">
+                                <h4>Skill Analysis</h4>
+                                <p>Your performance mapped across 6 key dimensions</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="similarity-card">
+                        <h3>Similar Players (KNN Algorithm)</h3>
+                        <div class="similar-players">
+                            <div class="similar-player" id="similarPlayer1">
+                                <h4>Most Similar Player</h4>
+                                <p class="player-name">--</p>
+                                <p class="similarity-score">--</p>
+                            </div>
+                            <div class="similar-player" id="similarPlayer2">
+                                <h4>Second Most Similar</h4>
+                                <p class="player-name">--</p>
+                                <p class="similarity-score">--</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="similarity-chart-container">
+                    <h3>Skill Comparison Radar</h3>
+                    <canvas id="similarPlayersChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2024 VolleyVision AI. Advanced ML volleyball analytics with time-series forecasting, anomaly detection, and player similarity search.</p>
+        </div>
+    </footer>
+
+    <script src="js/main.js"></script>
+    <script>
+        // Tab functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const navBtns = document.querySelectorAll('.nav-btn');
+            const tabContents = document.querySelectorAll('.tab-content');
+
+            navBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const targetTab = btn.getAttribute('data-tab');
+                    
+                    // Remove active class from all buttons and tabs
+                    navBtns.forEach(b => b.classList.remove('active'));
+                    tabContents.forEach(tab => tab.classList.remove('active'));
+                    
+                    // Add active class to clicked button and target tab
+                    btn.classList.add('active');
+                    document.getElementById(targetTab).classList.add('active');
+                });
+            });
+        });
+
+        // Original functions - keeping the exact same functionality
+        function autoFill() {
+            document.getElementById('playerName').value = 'Shreeya Gupta';
+            document.getElementById('spikeAccuracy').value = 87;
+            document.getElementById('blocks').value = 6;
+            document.getElementById('digs').value = 22;
+            document.getElementById('serves').value = '4/12';
+            document.getElementById('reactionTime').value = 310;
+        }
+
+        function submitForm() {
+            const name = document.getElementById('playerName').value;
+            const spike = parseFloat(document.getElementById('spikeAccuracy').value);
+            const blocks = parseFloat(document.getElementById('blocks').value);
+            const digs = parseFloat(document.getElementById('digs').value);
+            const serves = document.getElementById('serves').value.split('/');
+            const reaction = parseFloat(document.getElementById('reactionTime').value);
+
+            const serveRatio = parseFloat(serves[0]) / parseFloat(serves[1]);
+
+            // Original ML-like prediction (keeping the exact same logic)
+            const nextSpike = (spike + 0.2 * digs + 0.3 * serveRatio * 100 - 0.1 * reaction / 10).toFixed(2);
+            const nextBlocks = (blocks + 0.5 * serveRatio * 10 + 0.2 * spike / 10).toFixed(1);
+
+            showGraph(spike, blocks, nextSpike, nextBlocks);
+            alert(`Future performance predicted. Check graph below.`);
+        }
+
+        // Original chart functionality - keeping exactly the same
+        let chart;
+
+        function showGraph(currentSpike, currentBlocks, predictedSpike, predictedBlocks) {
+            const ctx = document.getElementById('performanceChart').getContext('2d');
+
+            if (chart) chart.destroy(); // Reset old chart
+
+            chart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Spike Accuracy (%)', 'Blocks'],
+                    datasets: [
+                        {
+                            label: 'Current',
+                            data: [currentSpike, currentBlocks],
+                            backgroundColor: 'rgba(52, 152, 219, 0.6)'
+                        },
+                        {
+                            label: 'Predicted',
+                            data: [predictedSpike, predictedBlocks],
+                            backgroundColor: 'rgba(241, 196, 15, 0.8)'
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            labels: { color: '#fff', font: { size: 14 } }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: { color: '#fff' }
+                        },
+                        x: {
+                            ticks: { color: '#fff' }
+                        }
+                    }
+                }
+            });
+        }
+    </script>
+</body>
+</html>
+ 
