@@ -134,6 +134,15 @@ The system uses a custom-generated volleyball dataset with the following feature
 - **Pandas**: Data manipulation and analysis
 - **NumPy**: Numerical computations
 - **Joblib**: Model serialization and persistence
+<img width="3377" height="1969" alt="image" src="https://github.com/user-attachments/assets/56211346-7b04-4277-bea4-a8e7107db93b" />
+<img width="3377" height="1951" alt="image" src="https://github.com/user-attachments/assets/acde6c60-e2fe-4051-b0e2-e3ed9e87e151" />
+<img width="3388" height="1964" alt="image" src="https://github.com/user-attachments/assets/b49a2d4f-4493-4eb8-922d-4e1ba756bd63" />
+<img width="3368" height="1944" alt="image" src="https://github.com/user-attachments/assets/9f23cdad-fdd8-46a8-af22-2ced06c741ef" />
+<img width="3380" height="1932" alt="image" src="https://github.com/user-attachments/assets/6afe10f5-1e6c-4f9f-b6b0-b09f20748277" />
+
+
+
+
 
 ## Repository Structure
 
